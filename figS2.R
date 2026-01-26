@@ -137,39 +137,6 @@ ggplot(plot_data, aes(x = LRS_ID, y = Gbp)) +
   )
 
 # ------------------------------------------------------------------------------
-#      Sup Fig 2b - Coverage per target of each sample
-# ------------------------------------------------------------------------------
-# enforce order on Sample
-cov_sum$Sample <- factor(cov_sum$Sample, levels = myopathy)
-
-# get unique mapping of Sample → LRS_ID in myopathy order
-id_order <- cov_sum[!duplicated(cov_sum$Sample), c("Sample", "LRS_ID")]
-id_order <- id_order[order(factor(id_order$Sample, levels = myopathy)), ]
-
-# set factor levels of LRS_ID based on that order
-cov_sum$LRS_ID <- factor(cov_sum$LRS_ID, levels = id_order$LRS_ID)
-
-cov_sum_filter <- cov_sum[!is.na(cov_sum$Sample), ]
-
-# plot
-ggplot(cov_sum_filter, aes(x = LRS_ID, y = Coverage)) +
-  geom_boxplot(outlier.shape = NA) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
-  labs(
-    title = "Coverage distribution per sample",
-    x = "Sample (LRS_ID)",
-    y = "Coverage"
-  ) +
-  theme_bw(base_size = 14) +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    panel.grid = element_blank(),
-    legend.position = "bottom"
-  )
-
-
-# ------------------------------------------------------------------------------
 #      Sup Fig 2c - ON-TARGET and OFF-TARGET PLOTS FOR N50
 # ------------------------------------------------------------------------------
 # Melt data for plotting
@@ -226,3 +193,176 @@ ggplot(plot_data, aes(x = LRS_ID, y = n50, color = category)) +
     axis.text.x = element_text(angle = 45, hjust = 1),
     panel.grid = element_blank()
   )
+
+# ------------------------------------------------------------------------------
+#      Sup Fig 2d - mt DNA coverage
+# ------------------------------------------------------------------------------
+
+mt_cov_sum <- fread("/g/data/kr68/fshd/coverage_analysis/mt_dna_coverage.txt", header = FALSE)
+setnames(mt_cov_sum, old = c("V1", "V2"), new = c("Sample", "Coverage"))
+
+mt_cov_sum <- merge(mt_cov_sum, sample_key, by = "Sample", all.x = TRUE)
+
+# enforce order on Sample
+mt_cov_sum$Sample <- factor(mt_cov_sum$Sample, levels = myopathy)
+
+# get unique mapping of Sample → LRS_ID in myopathy order
+id_order <- mt_cov_sum[!duplicated(mt_cov_sum$Sample), c("Sample", "LRS_ID")]
+id_order <- id_order[order(factor(id_order$Sample, levels = myopathy)), ]
+
+# set factor levels of LRS_ID based on that order
+mt_cov_sum$LRS_ID <- factor(mt_cov_sum$LRS_ID, levels = id_order$LRS_ID)
+
+mt_cov_sum_filter <- mt_cov_sum[!is.na(mt_cov_sum$Sample), ]
+
+ggplot(mt_cov_sum_filter, aes(x = LRS_ID, y = Coverage)) +
+  # geom_point(size = 4, position = position_dodge(width = 0.5), colour = "#ED872D") +
+  geom_bar(stat = "identity", fill = "#ED872D") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  labs(
+    title = "Mitochondrial DNA Coverage distribution per sample",
+    x = "Sample (LRS_ID)",
+    y = "Coverage"
+  ) +
+  theme_bw(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank(),
+    legend.position = "bottom"
+  )
+
+mt_cov_df <- as.data.frame(mt_cov_sum_filter)
+mean(mt_cov_df$Coverage)
+sd(mt_cov_df$Coverage)
+min(mt_cov_df$Coverage)
+max(mt_cov_df$Coverage)
+
+
+# ------------------------------------------------------------------------------
+#      Sup Fig 2b - Coverage per target of each sample
+# ------------------------------------------------------------------------------
+myop_panel <- fread("/g/data/kr68/bed/myopathy_panel_draft_2.gene_targets.chm13.bed", sep = "\t", header = FALSE)
+names(myop_panel) <- c("chr", "start", "end", "gene")
+
+cov_sum <- fread("/g/data/kr68/neysa/fshd_pipeline/coverage_analysis/per_feature_cov/merged_mean_cov.tsv", header = TRUE)
+
+cov_sum <- merge(cov_sum, sample_key, by = "Sample", all.x = TRUE)
+
+# enforce order on Sample
+cov_sum$Sample <- factor(cov_sum$Sample, levels = myopathy)
+
+# get unique mapping of Sample → LRS_ID in myopathy order
+id_order <- cov_sum[!duplicated(cov_sum$Sample), c("Sample", "LRS_ID")]
+id_order <- id_order[order(factor(id_order$Sample, levels = myopathy)), ]
+
+# set factor levels of LRS_ID based on that order
+cov_sum$LRS_ID <- factor(cov_sum$LRS_ID, levels = id_order$LRS_ID)
+
+cov_sum_filter <- cov_sum[!is.na(cov_sum$Sample), ]
+
+# plot
+ggplot(cov_sum_filter, aes(x = LRS_ID, y = Coverage)) +
+  geom_boxplot(outlier.shape = NA) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  labs(
+    title = "Coverage distribution per sample",
+    x = "Sample (LRS_ID)",
+    y = "Coverage"
+  ) +
+  theme_bw(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank(),
+    legend.position = "bottom"
+  )
+
+
+###########################################################################
+#                  coverage per gene in all samples                       #
+###########################################################################
+
+gene_of_interest <- myop_panel[["gene"]]
+
+cov_sum_filter <- cov_sum[!is.na(cov_sum$Sample), ]
+
+# plot - all at one
+plot_gene_cov_distribution <- function(cov_dt, plot_title) {
+  ggplot(cov_dt, aes(x = Gene, y = Coverage)) +
+    geom_boxplot(outlier.shape = NA) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    labs(
+      title = plot_title, #"Coverage distribution per gene"
+      x = "Panel regions (gene)",
+      y = "Coverage"
+    ) +
+    theme_bw(base_size = 14) +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      panel.grid = element_blank(),
+      legend.position = "bottom"
+    )
+}
+
+plot_gene_cov_distribution(cov_sum_filter, "Coverage distribution per gene")
+
+#########################################
+# Plot top 50 and bottom 50
+
+# Filter top 50
+sorted_cov_sum <- cov_sum_filter %>%
+  group_by(Gene) %>%
+  arrange(Coverage)
+
+# plot_gene_cov_distribution(sorted_cov_sum, "Coverage distribution per gene sorted")
+
+df_sorted_cov_sum <- as.data.frame(sorted_cov_sum)
+
+# Group and median sort
+df_median_myop_panel <- df_sorted_cov_sum %>%
+  group_by(Gene) %>%
+  summarise(median_gene_cov = median(Coverage)) %>%
+  arrange(median_gene_cov)
+
+##################################################################### ****
+# Bottom 50 median cov
+df_bottom50_median <- df_median_myop_panel %>%
+  slice_head(n=40)
+bottom_50_median_cov_gene <- df_bottom50_median[["Gene"]]
+
+# Plot bottom 50 cov median
+filtered_cov_sum_median_bottom50 <- df_sorted_cov_sum %>% 
+  filter(Gene %in% bottom_50_median_cov_gene)
+filtered_cov_sum_median_bottom50$Gene <- factor(filtered_cov_sum_median_bottom50$Gene, levels = bottom_50_median_cov_gene)
+bottom50_plot <- plot_gene_cov_distribution(filtered_cov_sum_median_bottom50, "Coverage distribution per gene lowest 50 median")
+
+##################################################################### ****
+# Top 50 median cov
+df_top50_median <- df_median_myop_panel %>%
+  slice_tail(n=40)
+top_50_median_cov_gene <- df_top50_median[["Gene"]]
+
+# Plot bottom 50 cov median
+filtered_cov_sum_median_top50 <- df_sorted_cov_sum %>% 
+  filter(Gene %in% top_50_median_cov_gene)
+filtered_cov_sum_median_top50$Gene <- factor(filtered_cov_sum_median_top50$Gene, levels = top_50_median_cov_gene)
+top50_plot <- plot_gene_cov_distribution(filtered_cov_sum_median_top50, "Coverage distribution per gene top 50 median")
+
+
+# # Ordering bottom 50 medians genes with bottom_50_median_cov_gene
+# filtered_cov_sum_median_bottom50 <- filtered_cov_sum_median_bottom50 %>%
+#   mutate(color_group = ifelse(Gene %in% bottom50_same_mean_median, "Both_mean_median", "Different"))
+# filtered_cov_sum_median_bottom50$Gene <- factor(filtered_cov_sum_median_bottom50$Gene, levels = bottom_50_median_cov_gene)
+# 
+# 
+# filtered_cov_sum_median_top50 <- filtered_cov_sum_median_top50 %>%
+#   mutate(color_group = ifelse(Gene %in% top50_same_mean_median, "Both_mean_median", "Different"))
+# filtered_cov_sum_median_top50$Gene <- factor(filtered_cov_sum_median_top50$Gene, levels = top_50_median_cov_gene)
+# plot_cov_gene_highlight(filtered_cov_sum_median_top50, "Coverage distribution per gene top 50 median highlight diff to mean", custom_colors)
+
+combined_plot <- bottom50_plot + top50_plot
+combined_plot & scale_y_continuous(limits = c(0, 300))
+
+
