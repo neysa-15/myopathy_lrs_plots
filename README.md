@@ -6,6 +6,15 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
 
  ## Inputs
 
+ ### Path to R library
+ `/path/to/your/r_library` containing these libraries:
+ * `data.table`
+ * `ggplot2`
+ * `tidyr`
+ * `patchwork`
+ * `scales`
+ * `dplyr`
+
  ### Sample key for most figures
  `/path/to/sample_key.tsv` containing two different de-identified name:
  * `Sample`: de-identified ID
