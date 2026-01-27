@@ -20,6 +20,15 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
  * `Sample`: de-identified ID
  * `LRS_ID`: long read id (this is what we show on the plots)
 
+### fig S1
+`/path/to/demographics_matrix.tsv` containing:
+* `ID`: Sample's de-identified ID
+* `Sex assigned at birth`: Male/female
+* `Age at onset (years)`
+* `Age at time of recruiment (years)`
+* `Disease duration at time of recruitment (years)`
+* `Previous testing`: Any list of previous testing which was done, put `Y` if test is done and `` if not
+
  ### fig S2
 `/path/to/sample_coverage_summary.tsv` need to have at least:
 * `sample`: sample name
