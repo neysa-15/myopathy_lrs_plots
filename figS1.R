@@ -1,44 +1,51 @@
-setwd("/g/data/kr68/neysa/r_plotting")
+setwd("/path/to/working/directory")
 
-.libPaths(c("/g/data/kr68/andre/R_libs"))
+# ------------------------------------------------------------------------------
+#                 Libraries
+# ------------------------------------------------------------------------------
+.libPaths(c("/path/to/your/r_library"))
 
 library(data.table)
 library(ggplot2)
 library(tidyr)
 library(patchwork)
 
-myop_matrix <- fread("/g/data/kr68/neysa/r_plotting/demographics_matrix.tsv", header = TRUE)
+# ------------------------------------------------------------------------------
+#                 Configuration
+# ------------------------------------------------------------------------------
+myop_matrix <- fread("/path/to/demographics_matrix.tsv", header = TRUE)
 setnames(myop_matrix, "ID", "Sample")
 
-sample_key <- fread("/g/data/kr68/puzzleapp/KISKUM_Myop/KISKUM_Myop.sample_key.tsv", sep = "\t", header = FALSE)
+# LRS_ID column would be the sample name you want to show on the plot
+sample_key <- fread("/path/to/sample_key.tsv", sep = "\t", header = FALSE)
 names(sample_key) <- c("LRS_ID", "Sample")
 sample_key[, LRS_ID := gsub("RS0*", "", LRS_ID)]
 
 # Merge annotation
 myop_matrix <- merge(myop_matrix, sample_key, by = "Sample", all.x = TRUE)
 
-previously_unsolved <- c("L236", "L286", "L143", "L126", "L136", "L248", "L437", "L157", "L147", "L121", "L140", 
-                         "L234", "L235", "L122", "L123", "L125", "L134", "L158", "L119", "L159", "L130", "L135", 
-                         "L131", "L132", "L133", "L129", "L155", "L156", "L146", "L249", "L323")
+previously_unsolved <- c("list of LRS_ID samples to plot")
 
 # Convert to df
 myop_df <- as.data.frame(myop_matrix)
 
 # Add missing LRS_ID from sample_key
 myop_df$LRS_ID <- as.character(myop_df$LRS_ID)
-myop_df$LRS_ID[myop_df$Sample == "R220038"] <- "L286"
+myop_df$LRS_ID[myop_df$Sample == "Your Sample Name"] <- "Your other abstracted name if exist"
 
 # Order
 myop_df$LRS_ID <- factor(myop_df$LRS_ID, levels = previously_unsolved)
 myop_df_ordered <- myop_df[order(myop_df$LRS_ID), ]
 
-myop_df_ordered <- myop_df_ordered %>% 
-  rename("Sex assigned at birth" = "Gender")
-
 # Add matrix row for final diagnosis
 myop_df_ordered$Diagnosis <- c(
-  "LGMD", "OPDM", "OPDM", "OPDM", "OPDM", "OPDM", "OPDM", "OPDM", "FSHD1",
-  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
+  "List of diagnosis, same order as sample order"
+)
+
+# Define metrics order for heatmap
+metric_order <- c(
+  "Diagnosis", "Sex assigned at birth", "Targeted gene panel", "Exome-based neuromuscular panel",
+  "Genome sequencing", "FSHD SB", "DM1 test", "DM2 test", "DMD MLPA", "Muscle biopsy"
 )
 
 # ------------------------------------------------------------------------------
@@ -86,12 +93,6 @@ plot_age <- ggplot(df_long, aes(x = LRS_ID, y = Years, fill = Metric)) +
 # ------------------------------------------------------------------------------
 # Plot matrix / heatmap
 # ------------------------------------------------------------------------------
-
-# Define metrics order
-metric_order <- c(
-  "Diagnosis", "Sex assigned at birth", "Targeted genel panel", "Exome-based neuromuscular panel",
-  "Genome sequencing", "FSHD SB", "DM1 test", "DM2 test", "DMD MLPA", "Muscle biopsy"
-)
 
 # Pivot the data to "long" format for plotting
 df_long_matrix <- myop_df_ordered %>%

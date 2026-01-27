@@ -1,9 +1,9 @@
-setwd("/g/data/kr68/neysa/r_plotting/rcode_per_fig")
+setwd("/path/to/your/working/dir")
 
 # ------------------------------------------------------------------------------
 #                 Libraries
 # ------------------------------------------------------------------------------
-.libPaths(c("/g/data/kr68/andre/R_libs"))
+.libPaths(c("/path/to/your/R_libs"))
 
 library(data.table)
 library(ggplot2)
@@ -12,24 +12,19 @@ library(patchwork)
 # ------------------------------------------------------------------------------
 #                 Data loading and processing
 # ------------------------------------------------------------------------------
-cov_sum <- fread("/g/data/kr68/neysa/fshd_pipeline/coverage_analysis/summaries/sample_coverage_summary_complete_noreadlengths.tsv", header = TRUE)
+cov_sum <- fread("/path/to/sample_coverage_summary.tsv", header = TRUE) 
 setnames(cov_sum, "sample", "Sample")
 
 # Load and clean sample key
-sample_key <- fread("/g/data/kr68/puzzleapp/KISKUM_Myop/KISKUM_Myop.sample_key.tsv", sep = "\t", header = FALSE)
+sample_key <- fread("/path/to/sample_key.tsv", sep = "\t", header = FALSE)
 names(sample_key) <- c("LRS_ID", "Sample")
 sample_key[, LRS_ID := gsub("RS0*", "", LRS_ID)]
 
 myopathy <- c(
-  "ZE2607", "RC1309", "BH0608", "ZD0608", "IB2806", "SA1110", "VQ2510", "BC2211", 
-  "JOUB61166", "AS2603", "R230025", "JURA89", "KAHO2804", "JOBO3009", "RJ1207", 
-  "GL2106", "R240177", "R240183", "R240059", "DL1104", "PN1206", "R220038", 
-  "BP0703", "JZ2510", "AK2208", "R240186", "R240088", "CF2608", "GUAT0705", 
-  "SAHI0207", "DOHO2501", "EW5762", "QOL0607", "ZB1207", "BA0908", "ZU1108", 
-  "BF1708", "PS1509", "LU1110", "ZL0811", "FK1411", "ZL2011", "KN2211", "DC2702", 
-  "BQ1303", "QQ0805", "BV2705", "WQ2407", "R250002", "R250028"
+  "list of samples ordered by however user like to see it on the figure"
 )
 
+# DATA FOR FIG S2A and S2C
 # Merge annotations
 cov_sum <- merge(cov_sum, sample_key, by = "Sample", all.x = TRUE)
 cov_sum <- cov_sum[Sample %in% myopathy]
@@ -45,6 +40,19 @@ cov_sum[, Sample_Label := factor(Sample, levels = myopathy)]
 sample_order_dt <- unique(cov_sum[, .(Sample, Sample_Label)])
 setorder(sample_order_dt, Sample_Label, Sample)
 cov_sum[, Sample := factor(Sample, levels = sample_order_dt$Sample)]
+
+# DATA FOR FIG S2B and SX - coverage per sample or per gene
+# Path to myopathy panel
+myop_panel <- fread("/path/to/myopathy_panel.bed", sep = "\t", header = FALSE)
+names(myop_panel) <- c("chr", "start", "end", "gene")
+
+cov_merged <- fread("/path/to/coverage_per_gene_per_sample.tsv", header = TRUE)
+
+cov_merged <- merge(cov_merged, sample_key, by = "Sample", all.x = TRUE)
+
+# DATA FOR FIG S2D
+mt_cov_sum <- fread("/path/to/mt_dna_coverage.txt", header = FALSE)
+setnames(mt_cov_sum, old = c("V1", "V2"), new = c("Sample", "Coverage"))
 
 # ------------------------------------------------------------------------------
 #        Sup Fig 2a - ON-TARGET and OFF-TARGET PLOTS FOR SIZE
@@ -198,9 +206,6 @@ ggplot(plot_data, aes(x = LRS_ID, y = n50, color = category)) +
 #      Sup Fig 2d - mt DNA coverage
 # ------------------------------------------------------------------------------
 
-mt_cov_sum <- fread("/g/data/kr68/fshd/coverage_analysis/mt_dna_coverage.txt", header = FALSE)
-setnames(mt_cov_sum, old = c("V1", "V2"), new = c("Sample", "Coverage"))
-
 mt_cov_sum <- merge(mt_cov_sum, sample_key, by = "Sample", all.x = TRUE)
 
 # enforce order on Sample
@@ -242,27 +247,21 @@ max(mt_cov_df$Coverage)
 # ------------------------------------------------------------------------------
 #      Sup Fig 2b - Coverage per target of each sample
 # ------------------------------------------------------------------------------
-myop_panel <- fread("/g/data/kr68/bed/myopathy_panel_draft_2.gene_targets.chm13.bed", sep = "\t", header = FALSE)
-names(myop_panel) <- c("chr", "start", "end", "gene")
-
-cov_sum <- fread("/g/data/kr68/neysa/fshd_pipeline/coverage_analysis/per_feature_cov/merged_mean_cov.tsv", header = TRUE)
-
-cov_sum <- merge(cov_sum, sample_key, by = "Sample", all.x = TRUE)
 
 # enforce order on Sample
-cov_sum$Sample <- factor(cov_sum$Sample, levels = myopathy)
+cov_merged$Sample <- factor(cov_merged$Sample, levels = myopathy)
 
 # get unique mapping of Sample → LRS_ID in myopathy order
-id_order <- cov_sum[!duplicated(cov_sum$Sample), c("Sample", "LRS_ID")]
+id_order <- cov_merged[!duplicated(cov_merged$Sample), c("Sample", "LRS_ID")]
 id_order <- id_order[order(factor(id_order$Sample, levels = myopathy)), ]
 
 # set factor levels of LRS_ID based on that order
-cov_sum$LRS_ID <- factor(cov_sum$LRS_ID, levels = id_order$LRS_ID)
+cov_merged$LRS_ID <- factor(cov_merged$LRS_ID, levels = id_order$LRS_ID)
 
-cov_sum_filter <- cov_sum[!is.na(cov_sum$Sample), ]
+cov_merged_filter <- cov_merged[!is.na(cov_merged$Sample), ]
 
 # plot
-ggplot(cov_sum_filter, aes(x = LRS_ID, y = Coverage)) +
+ggplot(cov_merged_filter, aes(x = LRS_ID, y = Coverage)) +
   geom_boxplot(outlier.shape = NA) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
@@ -278,14 +277,13 @@ ggplot(cov_sum_filter, aes(x = LRS_ID, y = Coverage)) +
     legend.position = "bottom"
   )
 
-
-###########################################################################
-#                  coverage per gene in all samples                       #
-###########################################################################
+# ------------------------------------------------------------------------------
+#      Sup Fig X - Coverage per gene in all samples
+# ------------------------------------------------------------------------------
 
 gene_of_interest <- myop_panel[["gene"]]
 
-cov_sum_filter <- cov_sum[!is.na(cov_sum$Sample), ]
+cov_merged_filter <- cov_merged[!is.na(cov_merged$Sample), ]
 
 # plot - all at one
 plot_gene_cov_distribution <- function(cov_dt, plot_title) {
@@ -306,13 +304,13 @@ plot_gene_cov_distribution <- function(cov_dt, plot_title) {
     )
 }
 
-plot_gene_cov_distribution(cov_sum_filter, "Coverage distribution per gene")
+plot_gene_cov_distribution(cov_merged_filter, "Coverage distribution per gene")
 
 #########################################
 # Plot top 50 and bottom 50
 
 # Filter top 50
-sorted_cov_sum <- cov_sum_filter %>%
+sorted_cov_sum <- cov_merged_filter %>%
   group_by(Gene) %>%
   arrange(Coverage)
 
