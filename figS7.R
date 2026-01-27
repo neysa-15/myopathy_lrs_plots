@@ -1,9 +1,9 @@
-setwd("/g/data/kr68/neysa/r_plotting/rcode_per_fig")
+setwd("/path/to/working/directory")
 
 # ------------------------------------------------------------------------------
 #                 Libraries
 # ------------------------------------------------------------------------------
-.libPaths(c("/g/data/kr68/andre/R_libs"))
+.libPaths(c("/path/to/your/r_library"))
 
 library(data.table)
 library(ggplot2)
@@ -12,8 +12,8 @@ library(patchwork)
 # ------------------------------------------------------------------------------
 #                 Configuration
 # ------------------------------------------------------------------------------
-base_output_dir <- "/g/data/kr68/andre/fshd_pipeline/subsampling_experiment"
-sample_ids <- c("AS2603", "JOUB61166", "RJ1207", "GUAT0705")
+base_output_dir <- "/path/to/subsampling_experiment/output"
+sample_ids <- c("Sample of interest list")
 sd_settings <- c("5sd", "10sd", "10sd_50draws")
 combined_output_file <- file.path(base_output_dir, "combined_subsampling_summary.tsv")
 

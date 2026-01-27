@@ -1,9 +1,9 @@
-setwd("/g/data/kr68/neysa/r_plotting/rcode_per_fig")
+setwd("/path/to/working/directory")
 
 # ------------------------------------------------------------------------------
 #                 Libraries
 # ------------------------------------------------------------------------------
-.libPaths(c("/g/data/kr68/andre/R_libs"))
+.libPaths(c("/path/to/your/r_library"))
 
 library(data.table)
 library(ggplot2)
@@ -13,25 +13,25 @@ library(patchwork)
 #                 Variables
 # ------------------------------------------------------------------------------
 # Directory of d4z4ling results
-base_dir <- "/g/data/kr68/fshd/results_mapq0"
+base_dir <- "/path/to/d4z4ling/results_directory"
 
 # Grouping of FSHD group
-fshd1 <- c("JOUB61166","AS2603","R230025","JURA89","KAHO2804","JOBO3009","RJ1207","GL2106","R240177","R240183","CF2608")
-fshd2 <- c("R240059","DL1104","R250109")
-fshd1_n_2 <- c("R250119")
-fshd1_borderline <- c("GUAT0705")
-non_fshd <- c(
-  "ZE2607", "RC1309", "BH0608", "ZD0608", "IB2806", "SA1110", "VQ2510", "BC2211", "PN1206", "R220038", "BP0703", "JZ2510", "AK2208", "R240186", "R250113",
-  "R240088", "SAHI0207", "DOHO2501", "EW5762", "QOL0607", "ZB1207", "BA0908", "ZU1108", "BF1708", "PS1509", "LU1110", "ZL0811", "FK1411",
-  "ZL2011", "KN2211", "DC2702", "BQ1303", "QQ0805", "BV2705", "WQ2407", "R250002", "R250028"
-)
+fshd1 <- c("FSHD1 sample list")
+fshd2 <- c("FSHD2 sample list")
+fshd1_n_2 <- c("FSHD1+2 sample list")
+fshd1_borderline <- c("borderline fshd1 sample list (11 d4z4 copies)")
+non_fshd <- c("FSHD negative list")
 
 # Sample name conversion of different identifier
-sample_key <- "/g/data/kr68/puzzleapp/KISKUM_Myop/KISKUM_Myop.sample_key.tsv"
+sample_key <- "/path/to/sample_key.tsv"
 sample_key <- fread(sample_key, sep = "\t", header = FALSE)
 names(sample_key) <- c("LRS_ID","Sample")
 sample_key[, LRS_ID := gsub("RS0*", "", LRS_ID)]
 sample_key <- as.data.frame(sample_key)
+
+# For subsampling experiment
+base_output_dir <- "/path/to/subsampling_experiment/input_output"
+sample_ids <- c("sample of interest for subsampling experiment")
 
 # ------------------------------------------------------------------------------
 #                 Colors
@@ -313,8 +313,6 @@ ggsave("d4z4_copies_plot_fixed.pdf", plot = plot_with_fixed_panel)
 # ------------------------------------------------------------------------------
 
 # Configuration
-base_output_dir <- "/g/data/kr68/andre/fshd_pipeline/subsampling_experiment"
-sample_ids <- c("AS2603", "JOUB61166", "RJ1207", "GUAT0705")
 sd_settings <- c("5sd", "10sd", "10sd_50draws")
 combined_output_file <- file.path(base_output_dir, "combined_subsampling_summary.tsv")
 

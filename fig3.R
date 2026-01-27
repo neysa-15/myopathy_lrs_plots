@@ -1,9 +1,9 @@
-setwd("/g/data/kr68/neysa/r_plotting/rcode_per_fig")
+setwd("/path/to/working/directory")
 
 # ------------------------------------------------------------------------------
 #                 Libraries
 # ------------------------------------------------------------------------------
-.libPaths(c("/g/data/kr68/andre/R_libs"))
+.libPaths(c("/path/to/your/r_library"))
 # install.packages(c("data.table","ggplot2","patchwork","scales","zoo"))
 
 library(data.table)
@@ -15,25 +15,34 @@ library(scales)
 #                 Variables
 # ------------------------------------------------------------------------------
 # Directory of d4z4ling results
-base_dir <- "/g/data/kr68/fshd/results_mapq0"
+base_dir <- "/path/to/d4z4ling/results_directory"
 
 # Grouping of FSHD group
-fshd1 <- c("JOUB61166","AS2603","R230025","JURA89","KAHO2804","JOBO3009","RJ1207","GL2106","R240177","R240183","CF2608")
-fshd2 <- c("R240059","DL1104","R250109")
-fshd1_n_2 <- c("R250119")
-fshd1_borderline <- c("GUAT0705")
-non_fshd <- c(
-  "ZE2607", "RC1309", "BH0608", "ZD0608", "IB2806", "SA1110", "VQ2510", "BC2211", "PN1206", "R220038", "BP0703", "JZ2510", "AK2208", "R240186", "R250113",
-  "R240088", "SAHI0207", "DOHO2501", "EW5762", "QOL0607", "ZB1207", "BA0908", "ZU1108", "BF1708", "PS1509", "LU1110", "ZL0811", "FK1411",
-  "ZL2011", "KN2211", "DC2702", "BQ1303", "QQ0805", "BV2705", "WQ2407", "R250002", "R250028"
-)
+fshd1 <- c("FSHD1 sample list")
+fshd2 <- c("FSHD2 sample list")
+fshd1_n_2 <- c("FSHD1+2 sample list")
+fshd1_borderline <- c("borderline fshd1 sample list (11 d4z4 copies)")
+non_fshd <- c("FSHD negative list")
 
 # Sample name conversion of different identifier
-sample_key <- "/g/data/kr68/puzzleapp/KISKUM_Myop/KISKUM_Myop.sample_key.tsv"
+sample_key <- "/path/to/sample_key.tsv"
 sample_key <- fread(sample_key, sep = "\t", header = FALSE)
 names(sample_key) <- c("LRS_ID","Sample")
 sample_key[, LRS_ID := gsub("RS0*", "", LRS_ID)]
 sample_key <- as.data.frame(sample_key)
+
+# samples
+biallelic_fshd1_sample <- "sample with fshd1 with double contraction"
+positive_unadiagnosed_sample <- "positive fshd1 sample"
+prev_false_positive_fshd1 <- "previously false positive sample"
+prev_false_positive_fshd1_read_id <- "one of the read ID showing false positive on sample"
+borderline_fshd1_case <- "sample with 11 copies"
+fshd2_sample_list <- c("list of samples with fshd2")
+
+# FSHD2 with in-cis duplication
+fshd2_incis_duplication_sample <- "fshd2 sample with incis duplication"
+asm_phase     <- "choose hap1 / hap2"
+assembly_dir  <- "/path/to/phased/assembly/results"
 
 # ------------------------------------------------------------------------------
 #                 Data input and processing
@@ -68,6 +77,13 @@ combined_dt[, Sample := factor(Sample, levels = combined_dt[order(Sample_Label, 
 # Filter out samples that's not in any group
 combined_dt <- combined_dt[!is.na(Sample_Label)]
 
+label_colours <- c(
+  "FSHD1" = "#ffe0e0",
+  "FSHD2" = "#e0f7fa",
+  "FSHD1+2"= "#efe0ff",
+  "Borderline FSHD1" = "#D6FAC3",
+  "FSHD Negative" = "#e0e0e0"
+)
 
 # ------------------------------------------------------------------------------
 #                 Figure 3b, h and k
@@ -103,15 +119,15 @@ plot_4q <- combined_dt[
 ]
 
 # Fig3c - FSHD1 Positive - Double contraction
-sample_id <- "R240183"
+sample_id <- biallelic_fshd1_sample
 plot_fshd_5mC_vs_d4z4copies_4qA(sample_id, plot_4q)
 
 # Fig3k - Previously undiagnosed FSHD1 case
-sample_id <- "CF2608"
+sample_id <- positive_unadiagnosed_sample
 plot_fshd_5mC_vs_d4z4copies_4qA(sample_id, plot_4q)
 
 # Fig3h - Previously false positive FSHD1
-sample_id <- "GL2106"
+sample_id <- prev_false_positive_fshd1
 plot_fshd_5mC_vs_d4z4copies_facet(sample_id)
 
 
@@ -260,9 +276,9 @@ pileup_plot <- function(sample_id, result_dir, reference_feature = "pLAM", compl
 }
 
 # 3c
-pileup_plot("R240183", base_dir)
+pileup_plot(biallelic_fshd1_sample, base_dir)
 # 3l
-pileup_plot("GUAT0705", base_dir)
+pileup_plot(borderline_fshd1_case, base_dir)
 
 # ------------------------------------------------------------------------------
 #                 Figure 3e - FSHD2 assembly methylation of 4qA allele
@@ -288,12 +304,6 @@ plot_asm_meth <- function(sample_id, summary_tsv, annot_bed = NULL,
   # 2. Load and Prepare Annotations
   feat <- data.table()
   strand_val <- "+" # Default
-  # if (!is.null(annot_bed) && file.exists(annot_bed)) {
-  #   feat <- fread(annot_bed, header = FALSE)
-  #   strand <- feat$V6[feat$V4 == "pLAM"][1]
-  # } else {
-  #   strand <- "+"
-  # }
   
   if (!is.null(annot_bed) && file.exists(annot_bed)) {
     feat <- fread(annot_bed, header = FALSE)
@@ -417,9 +427,9 @@ plot_asm_meth <- function(sample_id, summary_tsv, annot_bed = NULL,
   p_met
 }
 
-sample_id <- "DL1104"
-phase     <- "hap1"
-base_dir  <- "/g/data/kr68/fshd/results_phased_assembly"
+sample_id <- fshd2_incis_duplication_sample
+phase     <- asm_phase
+base_dir  <- assembly_dir
 
 summary_tsv <- sprintf("%s/%s/%s_%s/%s_realigned_modfreq_cov_summary.tsv",
                        base_dir, sample_id, sample_id, phase, sample_id)
@@ -447,7 +457,7 @@ panel_noleg
 # ------------------------------------------------------------------------------
 #                 Figure 3f - FSHD2 distal methylation levels
 # ------------------------------------------------------------------------------
-sample_id <- c("DL1104","R240059", "R250109")
+sample_id <- fshd2_sample_list
 fshd2_meth <- combined_dt[!is.na(Haplotype) & MappedEstimatedCopies>=2 & Sample %in% sample_id]
 
 # Build the boxplot as its own object
@@ -469,14 +479,14 @@ ggplot(fshd2_meth, aes(x = Haplotype, y = pLAM_Methylation_Percentage)) +
 # ------------------------------------------------------------------------------
 #                 Figure 3i - False positive FSHD1 restriction sites
 # ------------------------------------------------------------------------------
-sample_id <- "GL2106"
-sample_dt <- combined_dt[combined_dt$Sample == "GL2106"]
+sample_id <- prev_false_positive_fshd1
+sample_dt <- combined_dt[combined_dt$Sample == sample_id]
 max_number_copies <- max(as.integer(sample_dt$MappedEstimatedCopies), na.rm = TRUE)
 
 plot_fshd_read <- function(sample_id,
                            read_id,
                            reference_feature = c("pLAM","p13-E11"),
-                           base_dir = "/g/data/kr68/fshd/results_mapq0",
+                           base_dir = base_dir,
                            track_layout = c("rows","overlay"),
                            use_file_counts = TRUE,
                            min_x = NULL, max_x = NULL) {
@@ -748,12 +758,11 @@ plot_fshd_read <- function(sample_id,
 
 
 # Separate rows for XapI/BlnI
-read_example <- plot_fshd_read("GL2106", "260720b8-7c68-4003-bac2-bbad92bda96a",
+read_example <- plot_fshd_read(prev_false_positive_fshd1, prev_false_positive_fshd1_read_id,
                                reference_feature = "pLAM",
                                track_layout = "rows",
                                min_x = -42000, max_x = 10000)
 
-# sample_id <- c("GL2106")
 false_positive <- combined_dt[!is.na(Haplotype) & MappedEstimatedCopies>=2 & Sample %in% sample_id]
 
 false_positive$Haplotype <- factor(false_positive$Haplotype,levels=c("4qA","4qB","10qA"))

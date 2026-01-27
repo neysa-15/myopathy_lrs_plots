@@ -1,21 +1,31 @@
-setwd("/g/data/kr68/neysa/r_plotting")
+setwd("/path/to/working/directory")
 
-.libPaths(c("/g/data/kr68/andre/R_libs"))
+# ------------------------------------------------------------------------------
+#                 Libraries
+# ------------------------------------------------------------------------------
+.libPaths(c("/path/to/your/r_library"))
 
 library(data.table)
 library(ggplot2)
 library(dplyr)
 
-base_dir <- "/g/data/kr68/fshd/results_mapq0"
+# ------------------------------------------------------------------------------
+#                 Configuration
+# ------------------------------------------------------------------------------
+base_dir <- "/path/to/d4z4ling/results_directory"
 
-fshd1 <- c("JOUB61166","AS2603","R230025","JURA89","KAHO2804","JOBO3009","RJ1207","CF2608")
-fshd1_biallelic <- c("R240177","R240183")
-fshd2 <- c("R240059","DL1104","R250109")
-fshd1_n_2 <- c("R250119")
+fshd1 <- c("FSHD1 sample list")
+fshd1_biallelic <- c("Biallelic FSHD1 sample list")
+fshd2 <- c("FSHD2 sample list")
+fshd1_n_2 <- c("FSHD1+2 sample list")
 
 # Read age of onset
-age_onset <- "/g/data/kr68/neysa/r_plotting/age_onset_group.tsv"
+age_onset <- "/path/to/age_onset_group.tsv"
 age_onset <- fread(age_onset, sep = "\t", header = TRUE)
+
+# ------------------------------------------------------------------------------
+#                 Data input and processing
+# ------------------------------------------------------------------------------
 
 # Retrieve relevant files
 all_dirs <- list.dirs(base_dir, recursive = FALSE, full.names = TRUE)
@@ -95,7 +105,9 @@ label_colours <- c(
   "FSHD1-biallelic" = "#fff3cd"
 )
 
-
+# ------------------------------------------------------------------------------
+#             Sup Figure 6a - Distal methylation vs Age at onset
+# ------------------------------------------------------------------------------
 # Correlation test
 correlation_res <- cor.test(combined_data$average_pLAM_methylation, combined_data$`Age at onset`)
 r_value <- round(correlation_res$estimate, 3)
@@ -117,7 +129,9 @@ methyl_corr_plot <- ggplot(combined_data, aes(x = average_pLAM_methylation, y = 
     panel.grid = element_blank()
   )
 
-####
+# ------------------------------------------------------------------------------
+#             Sup Figure 6c - D4Z4 copies vs Distal Methylation
+# ------------------------------------------------------------------------------
 # Correlation between average pLAM methylation and d4z4 copies
 corr_res_methyl_copies <- cor.test(combined_data$`floor(MappedEstimatedCopies)`, combined_data$average_pLAM_methylation)
 r_value_methyl_copies <- round(corr_res_methyl_copies$estimate, 3)
@@ -141,7 +155,7 @@ copies_methyl_corr_plot <- ggplot(combined_data, aes(x = `floor(MappedEstimatedC
 
 
 # ------------------------------------------------------------------------------
-# D4z4 Copies vs Age of Onset
+#             Sup Figure 6b - D4Z4 copies vs Age at onset
 # ------------------------------------------------------------------------------
 d4z4copies_summary <- combined_df %>%
   filter(ReadLabel == "Complete 4qA") %>%
@@ -153,7 +167,7 @@ combined_d4z4_data <- d4z4copies_summary %>%
   left_join(age_onset, by = "Sample")
 
 # Drop NA
-combined_d4z4_data <- combined_d4z4_data[!is.na(`Age at onset`)]
+# combined_d4z4_data <- combined_d4z4_data[!is.na(`Age at onset`)]
 
 # Correlation test
 d4z4_correlation_res <- cor.test(combined_d4z4_data$d4z4_copies, combined_d4z4_data$`Age at onset`)
