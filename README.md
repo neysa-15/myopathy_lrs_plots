@@ -20,3 +20,8 @@
 * `start`
 * `end`
 * `gene`
+
+`/path/to/coverage_per_gene_per_sample.tsv` containing:
+* `Sample`
+* `Gene`
+* `Coverage`: which is the coverage calculated per gene per sample
