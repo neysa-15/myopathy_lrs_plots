@@ -41,6 +41,7 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
 `/path/to/subsampling_experiment/input_output`: subsampling output directory
 
 ### fig 3
+`/path/to/phased/assembly/results`: results from d4z4ling that are assembled with hifiasm and rerun with d4z4ling for annotation
 
 ### fig S1
 `/path/to/demographics_matrix.tsv` containing:
