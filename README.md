@@ -22,6 +22,7 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
 
  ### Path to d4z4ling results
 `/path/to/d4z4ling/results_directory` with this structure:
+```
 /path/to/d4z4ling/results_directory/
 ├── sample1
 │   ├── sample1_mapped_features_summary.tsv
@@ -32,6 +33,7 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
 │   ├── sample2_all_features.bed
 │   ├──  ...
 ├── etc
+```
 
 ### fig S1
 `/path/to/demographics_matrix.tsv` containing:
