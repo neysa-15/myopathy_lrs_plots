@@ -8,9 +8,15 @@
  * `LRS_ID`: long read id (this is what we show on the plots)
 
  ### fig S2
-`/path/to/sample_coverage_summary_complete_noreadlengths.tsv` need to have:
+`/path/to/sample_coverage_summary_complete_noreadlengths.tsv` need to have at least:
 * `sample`
 * `total_bp_(Mbp)`
 * `on_target_bases_(Mbp)`
 * `n50`
 * `n50_on_target`
+
+`/path/to/myopathy_panel.bed` need to have at least 4 columns:
+* `chr`
+* `start`
+* `end`
+* `gene`
