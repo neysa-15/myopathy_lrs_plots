@@ -33,6 +33,12 @@ sample_key <- as.data.frame(sample_key)
 base_output_dir <- "/path/to/subsampling_experiment/input_output"
 sample_ids <- c("sample of interest for subsampling experiment")
 
+fshd1_positive_control <- "your positive fshd1 sample"
+non_fshd_control <- "your negative fshd sample"
+fshd2_control <- "your fshd2 sample"
+fshd1n2_control <- "your fshd1+2 sample"
+prev_false_positive_fshd1 <- "your conflicting fshd1 sample"
+
 # ------------------------------------------------------------------------------
 #                 Colors
 # ------------------------------------------------------------------------------
@@ -77,17 +83,6 @@ combined_dt[, Sample := factor(Sample, levels = combined_dt[order(Sample_Label, 
 # Filter out samples that's not in any group
 combined_dt <- combined_dt[!is.na(Sample_Label)]
 
-# Sample ordering
-# filtered_dt <- combined_dt[Sample_Label %in% c("FSHD1", "FSHD2", "FSHD1+2", "Borderline FSHD1")]
-# plot_dt <- filtered_dt[
-#   grepl("4qA|4qB", Haplotype)
-# ]
-# 
-# all_samples_ordered <- c(fshd1, fshd1_n_2, fshd2, fshd1_borderline)
-# 
-# # 2. Convert the 'Sample' column to a factor using this new master list
-# plot_dt[, Sample := factor(Sample, levels = all_samples_ordered)]
-
 # ------------------------------------------------------------------------------
 #                 Figure 2b and Sup Figure 5c
 # ------------------------------------------------------------------------------
@@ -121,7 +116,7 @@ plot_4q <- combined_dt[
 ]
 
 # Fig2 - FSHD1 Positive
-sample_id <- "JOUB61166"
+sample_id <- fshd1_positive_control
 plot_fshd_5mC_vs_d4z4copies_4qA(sample_id, plot_4q)
 
 # Resizing plot for manuscript
@@ -134,7 +129,7 @@ filename <- paste(sample_id, "_d4z4vsmethy.pdf", sep = "")
 ggsave(filename, plot = control_panel)
 
 # Fig2 - non-FSHD
-sample_id <- "R250002"
+sample_id <- non_fshd_control
 plot_fshd_5mC_vs_d4z4copies_4qA(sample_id, plot_4q)
 
 # Resizing plot for manuscript
@@ -147,7 +142,6 @@ filename <- paste(sample_id, "_d4z4vsmethy.pdf", sep = "")
 ggsave(filename, plot = control_panel)
 
 # # Fig2 - FSHD2
-sample_id <- "DL1104"
 ####################
 # Facet plot for FSHD2 and FSHD1+2
 plot_fshd_5mC_vs_d4z4copies_facet <- function(sample_id) {
@@ -170,7 +164,7 @@ plot_fshd_5mC_vs_d4z4copies_facet <- function(sample_id) {
 }
 
 # # Fig2 - FSHD2
-sample_id <- "DL1104"
+sample_id <- fshd2_control
 fshd2_facet_plot <- plot_fshd_5mC_vs_d4z4copies_facet(sample_id)
 
 fshd2_panel <- set_panel_size(
@@ -182,7 +176,7 @@ filename <- paste(sample_id, "_d4z4vsmethy.pdf", sep = "")
 ggsave(filename, plot = fshd2_panel)
 
 # Supplementary Fig5c - FSHD1+2
-sample_id <- "R250119"
+sample_id <- fshd1n2_control
 fshd1_2 <- plot_fshd_5mC_vs_d4z4copies_facet(sample_id)
 
 fshd1_2_panel <- set_panel_size(
@@ -425,7 +419,7 @@ ggsave("lod_plot.pdf", plot = lod_fixed_panels)
 #                 Figure 2e
 # ------------------------------------------------------------------------------
 
-plot_methylation <- function(dt, region = "chr4", read_pattern = "4qA", 
+plot_methylation <- function(dt, prev_false_positive_fshd1, region = "chr4", read_pattern = "4qA", 
                               read_labels = c("Complete", "Partial distal"), 
                               neg_control_label = "FSHD Negative") {
   
@@ -486,7 +480,7 @@ plot_methylation <- function(dt, region = "chr4", read_pattern = "4qA",
   fshd1_values <- plot_dt[
     Sample_Label == "FSHD1" & 
       ReadCategory == paste("Complete", read_pattern) &
-      Sample != "GL2106",
+      Sample != prev_false_positive_fshd1,
     pLAM_Methylation_Percentage
   ]
   fshd1_line <- list(
