@@ -20,6 +20,19 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
  * `Sample`: de-identified ID
  * `LRS_ID`: long read id (this is what we show on the plots)
 
+ ### Path to d4z4ling results
+`/path/to/d4z4ling/results_directory` with this structure:
+/path/to/d4z4ling/results_directory/
+├── sample1
+│   ├── sample1_mapped_features_summary.tsv
+│   ├── sample1_all_features.bed
+│   ├──  ...
+├── sample2
+│   ├── sample2_mapped_features_summary.tsv
+│   ├── sample2_all_features.bed
+│   ├──  ...
+├── etc
+
 ### fig S1
 `/path/to/demographics_matrix.tsv` containing:
 * `ID`: Sample's de-identified ID
@@ -58,3 +71,13 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
 `/path/to/mt_dna_coverage.tx` containing:
 * `Sample`: sample name
 * `Coverage`: mtDNA coverage of sample
+
+### fig S6
+`/path/to/age_onset_group.tsv` with these columns:
+* `LRS_ID`
+* `Sample`
+* `Group`: FSHD1/FSHD2/FSHD1-biallelic/FSHD1+2
+* `Age at onset`
+
+### fig S7
+`/path/to/subsampling_experiment/output`: subsampling output directory
