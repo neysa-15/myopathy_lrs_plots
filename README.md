@@ -50,7 +50,7 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
 * `Age at onset (years)`
 * `Age at time of recruiment (years)`
 * `Disease duration at time of recruitment (years)`
-* `Previous testing`: Any list of previous testing which was done, put `Y` if test is done and `` if not, test done in our cases
+* `Previous testing`: Any list of previous testing which was done, put `Y` if test is done and ` ` if not, test done in our cases
    * `Exome-based neuromuscular panel`
    * `Genome sequencing`
    * `FSHD SB`

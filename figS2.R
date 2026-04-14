@@ -146,7 +146,11 @@ ggplot(plot_data, aes(x = LRS_ID, y = Gbp)) +
   )
 
 # ------------------------------------------------------------------------------
+<<<<<<< HEAD
 #      Sup Fig 2d - ON-TARGET and OFF-TARGET PLOTS FOR N50
+=======
+#      Sup Fig 2c - ON-TARGET and OFF-TARGET PLOTS FOR N50
+>>>>>>> 9226c65f1853ac5ef867aa5116bcdb3676f98dd6
 # ------------------------------------------------------------------------------
 # Melt data for plotting
 plot_data <- melt(
