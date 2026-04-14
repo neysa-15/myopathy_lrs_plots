@@ -8,6 +8,7 @@ setwd("/path/to/your/working/dir")
 library(data.table)
 library(ggplot2)
 library(patchwork)
+library(dplyr)
 
 # ------------------------------------------------------------------------------
 #                 Data loading and processing
@@ -145,7 +146,7 @@ ggplot(plot_data, aes(x = LRS_ID, y = Gbp)) +
   )
 
 # ------------------------------------------------------------------------------
-#      Sup Fig 2c - ON-TARGET and OFF-TARGET PLOTS FOR N50
+#      Sup Fig 2d - ON-TARGET and OFF-TARGET PLOTS FOR N50
 # ------------------------------------------------------------------------------
 # Melt data for plotting
 plot_data <- melt(
@@ -203,7 +204,7 @@ ggplot(plot_data, aes(x = LRS_ID, y = n50, color = category)) +
   )
 
 # ------------------------------------------------------------------------------
-#      Sup Fig 2d - mt DNA coverage
+#      Sup Fig 2e - mt DNA coverage
 # ------------------------------------------------------------------------------
 
 mt_cov_sum <- merge(mt_cov_sum, sample_key, by = "Sample", all.x = TRUE)
@@ -278,7 +279,7 @@ ggplot(cov_merged_filter, aes(x = LRS_ID, y = Coverage)) +
   )
 
 # ------------------------------------------------------------------------------
-#      Sup Fig X - Coverage per gene in all samples
+#      Sup Fig 2c - Coverage per gene in all samples
 # ------------------------------------------------------------------------------
 
 gene_of_interest <- myop_panel[["gene"]]
