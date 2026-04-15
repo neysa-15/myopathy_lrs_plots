@@ -49,7 +49,7 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
 Tool: `LongTR` version used: v1.0
 Run script: `./fig4/fig4b_genotype_STR.sh`
 
-#### fig 4b
+#### fig 4b and figS8B
 Tool: `bedtools` version used: v2.31.0
 Run script: `./fig4/fig4c_promoter_methylation.sh`
 
