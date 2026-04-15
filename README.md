@@ -43,6 +43,42 @@ Inherited myopathies are a group of disorders with diverse and complex genetic a
 ### fig 3
 `/path/to/phased/assembly/results`: results from d4z4ling that are assembled with hifiasm and rerun with d4z4ling for annotation
 
+### fig 5i - mtDNA deletion analysis
+
+#### SRA data downloads
+Tool dependencies for SRA downloads:
+* `samtools`
+* `minimap2`
+* `sratoolkit`
+
+Download SRA data by running `prefetch ${SRA_ID}`, then run `./fig5_mtDNA_analysis/map_sra_data_to_ref.sh ${SRA_ID}` to map to hg38
+
+#### Run analysis
+Tool dependencies for analysis:
+* `python3`:
+   * `pandas`
+* `samtools`
+* `mosdepth`
+
+create a combined output tsv with 
+```
+output_table="/path/to/analysis_dir/sample_proportion_summary_1kbp_deletion.tsv"
+echo -e "Sample\tTotal_reads\tTotal_reads_over_1kbp\tReads_with_big_deletion\tchrM_coverage_mean\tmyop_panel_cov_mean\tratio_mtcov_to_ontargetcov\tProportion_with_big_deletion\tProportion_with_big_deletion_over1kbp" > "$output_table"
+```
+
+Then run:
+```
+sample=your_sample_name
+HAPLOTAGGED_BAM=/path/to/sample_bam_file
+root_dir=/path/to/analysis_dir
+REGION_BED=/path/to/chrM_region_hg38.bed
+output_table="/path/to/analysis_dir/sample_proportion_summary_1kbp_deletion.tsv"
+
+./extract_deletion_cigar.sh "$sample" "$HAPLOTAGGED_BAM" "$root_dir" "$REGION_BED" "$output_table"
+```
+
+Finally, `fig5i.R` will generate the visualisation to compare the ratio of mtDNA deletions in all samples
+
 ### fig S1
 `/path/to/demographics_matrix.tsv` containing:
 * `ID`: Sample's de-identified ID
