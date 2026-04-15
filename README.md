@@ -168,4 +168,4 @@ output_table="/path/to/analysis_dir/sample_proportion_summary_1kbp_deletion.tsv"
 ./extract_deletion_cigar.sh "$sample" "$HAPLOTAGGED_BAM" "$root_dir" "$REGION_BED" "$output_table"
 ```
 
-Finally, `fig5i.R` will generate the visualisation to compare the ratio of mtDNA deletions in all samples
+Finally, `$output_table` can be used in `fig5i.R` to generate the visualisation to compare the ratio of mtDNA deletions in all samples
