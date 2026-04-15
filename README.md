@@ -17,7 +17,7 @@ myopathy_lrs_plots/
 │   └── fig4c_promoter_methylation.sh  # Bedtools promoter methylation script
 ├── fig5_mtDNA_analysis/      # mtDNA deletion analysis scripts
 │   ├── map_sra_data_to_ref.sh # script to map SRA data to hg38
-│   ├── extract_deletion_cigar.sh # script to extract cigar and run big_del_proportion.py for statistics
+│   ├── extract_deletion_cigar.sh # script to extract cigar and run big_del_proportion.py calculating big deletion proportion
 │   └── fig5i.R               # script to create the proportion comparison plot shown on fig5i
 ├── figS1.R                   # Cohort demographics heatmap
 ├── figS2.R                   # Sequencing coverage summary
@@ -133,6 +133,44 @@ The resulting TSV can be visualised using Prism, Excel, or a similar tool.
 
 ---
 
+### fig5_mtDNA_analysis/ — mtDNA deletion analysis (fig5i)
+
+#### SRA data download
+
+```bash
+prefetch ${SRA_ID}
+./fig5_mtDNA_analysis/map_sra_data_to_ref.sh ${SRA_ID}
+```
+
+Dependencies: `samtools`, `minimap2`, `sratoolkit`.
+
+#### Run analysis
+
+Create the output table header:
+
+```bash
+output_table="/path/to/analysis_dir/sample_proportion_summary_1kbp_deletion.tsv"
+echo -e "Sample\tTotal_reads\tTotal_reads_over_1kbp\tReads_with_big_deletion\tchrM_coverage_mean\tmyop_panel_cov_mean\tratio_mtcov_to_ontargetcov\tProportion_with_big_deletion\tProportion_with_big_deletion_over1kbp" > "$output_table"
+```
+
+Then per sample:
+
+```bash
+sample=your_sample_name
+HAPLOTAGGED_BAM=/path/to/sample_bam_file
+root_dir=/path/to/analysis_dir
+REGION_BED=/path/to/chrM_region_hg38.bed
+output_table="/path/to/analysis_dir/sample_proportion_summary_1kbp_deletion.tsv"
+
+./fig5_mtDNA_analysis/extract_deletion_cigar.sh "$sample" "$HAPLOTAGGED_BAM" "$root_dir" "$REGION_BED" "$output_table"
+```
+
+Dependencies: `python3` (pandas), `samtools`, `mosdepth`.
+
+The resulting `$output_table` is used by `fig5i.R` to compare the proportion of mtDNA deletion-containing reads across samples.
+
+---
+
 ### figS1.R — Cohort demographics
 
 Requires `/path/to/demographics_matrix.tsv` with the following columns:
@@ -213,44 +251,6 @@ Pathogenic expansion thresholds (in repeat units) are hardcoded in the script an
 | NOTCH2NLC | 66 | 517 |
 | RILPL1 | 120 | 197 |
 | GIPC1 | 73 | 164 |
-
----
-
-### fig5_mtDNA_analysis/ — mtDNA deletion analysis (fig5i)
-
-#### SRA data download
-
-```bash
-prefetch ${SRA_ID}
-./fig5_mtDNA_analysis/map_sra_data_to_ref.sh ${SRA_ID}
-```
-
-Dependencies: `samtools`, `minimap2`, `sratoolkit`.
-
-#### Run analysis
-
-Create the output table header:
-
-```bash
-output_table="/path/to/analysis_dir/sample_proportion_summary_1kbp_deletion.tsv"
-echo -e "Sample\tTotal_reads\tTotal_reads_over_1kbp\tReads_with_big_deletion\tchrM_coverage_mean\tmyop_panel_cov_mean\tratio_mtcov_to_ontargetcov\tProportion_with_big_deletion\tProportion_with_big_deletion_over1kbp" > "$output_table"
-```
-
-Then per sample:
-
-```bash
-sample=your_sample_name
-HAPLOTAGGED_BAM=/path/to/sample_bam_file
-root_dir=/path/to/analysis_dir
-REGION_BED=/path/to/chrM_region_hg38.bed
-output_table="/path/to/analysis_dir/sample_proportion_summary_1kbp_deletion.tsv"
-
-./fig5_mtDNA_analysis/extract_deletion_cigar.sh "$sample" "$HAPLOTAGGED_BAM" "$root_dir" "$REGION_BED" "$output_table"
-```
-
-Dependencies: `python3` (pandas), `samtools`, `mosdepth`.
-
-The resulting `$output_table` is used by `fig5i.R` to compare the proportion of mtDNA deletion-containing reads across samples.
 
 ---
 
